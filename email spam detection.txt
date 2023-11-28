@@ -1,0 +1,71 @@
+# Import necessary libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import LabelEncoder
+
+# Load the dataset (replace 'your_dataset.csv' with the actual file path)
+data = pd.read_csv('/content/spam.csv')
+
+# Display basic information about the dataset
+print(data.info())
+
+# Check for missing values
+print(data.isnull().sum())
+
+
+# Assuming 'text' is the column containing email content, and 'label' is the column containing spam or not spam labels
+X = data['Message']
+y = data['Category']
+
+# Convert labels to numerical values (0 for 'ham' or 1 for 'spam')
+label_encoder = LabelEncoder()
+data['Category'] = label_encoder.fit_transform(data['Category'])
+
+
+# Tokenize the emails using TF-IDF
+tfidf_vectorizer = TfidfVectorizer(stop_words='english', max_features=5000)
+X_tfidf = tfidf_vectorizer.fit_transform(data['Message'])
+
+# Split the dataset
+X_train, X_test, y_train, y_test = train_test_split(X_tfidf, data['Category'], test_size=0.2, random_state=42)
+
+# Create a Random Forest classifier
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# Train the Random Forest model
+rf_model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = rf_model.predict(X_test)
+
+
+# Evaluate the Random Forest model
+accuracy = accuracy_score(y_test, y_pred)
+print(f'Accuracy: {accuracy}')
+
+print(classification_report(y_test, y_pred))
+
+# Function to predict whether an email is spam or not
+def predict_spam(email_content):
+    # Tokenize the input email using TF-IDF
+    email_tfidf = tfidf_vectorizer.transform([email_content])
+
+    # Predict using the trained Random Forest model
+    prediction = rf_model.predict(email_tfidf)
+
+    # Convert numerical prediction back to 'ham' or 'spam'
+    return label_encoder.inverse_transform(prediction)[0]
+
+# User input for email content
+user_input_email = input("Enter the email content: ")
+
+# Predict whether the given email is spam or not
+prediction_result = predict_spam(user_input_email)
+
+print(f"The given email is predicted as: {prediction_result}")
+
+
+
