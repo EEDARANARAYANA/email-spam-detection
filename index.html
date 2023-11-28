@@ -97,7 +97,7 @@
     }
 
     async function tfidf(emailContent) {
-      const response = await fetch('https://raw.githubusercontent.com/<username>/<repository>/main/random_forest_model.pkl');
+      const response = await fetch('https://raw.githubusercontent.com/<EEDARANARAYANA>/<email_spam_detection>/main/random_forest_model.pkl');
       const rawText = await response.text();
 
       const emailTfidf = await tfidf_vectorizer.transform([emailContent]);
